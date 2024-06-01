@@ -24,16 +24,19 @@ public class GatewayRouter {
     @Autowired
     GatewayHandler gatewayHandler;
 
-    @Bean
-    public RouterFunction<?> helloRouterFunction() {
-        return route(GET("/hello"),
-                helloHandler::handle);
-    }
+    @Autowired
+    GatewayWebHandler gatewayWebHandler;
 
-    @Bean
-    public RouterFunction<?> gatewayRouterFunction() {
-        return route(GET("/gw").or(POST("/gw/**")),
-                gatewayHandler::handle);
-    }
+//    @Bean
+//    public RouterFunction<?> helloRouterFunction() {
+//        return route(GET("/hello"),
+//                helloHandler::handle);
+//    }
+//
+//    @Bean
+//    public RouterFunction<?> gatewayRouterFunction() {
+//        return route(GET("/gw").or(POST("/gw/**")),
+//                gatewayHandler::handle);
+//    }
 
 }
