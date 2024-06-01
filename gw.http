@@ -1,0 +1,15 @@
+### GET hello
+GET http://localhost:8888/hello
+
+### GET gw
+GET http://localhost:8888/gw
+
+### POST gw
+POST http://localhost:8888/gw/cn.william.wmrpc.demo.api.UserService
+Content-Type: application/json
+
+{
+  "service":"cn.william.wmrpc.demo.api.UserService",
+  "methodSign":"findById@1_int",
+  "args":[100]
+}
