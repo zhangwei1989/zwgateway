@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ZwgatewayApplication {
+public class ZWgatewayApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(ZwgatewayApplication.class, args);
+        SpringApplication.run(ZWgatewayApplication.class, args);
     }
 
 }
