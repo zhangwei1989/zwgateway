@@ -4,8 +4,21 @@ GET http://localhost:8888/hello
 ### GET gw
 GET http://localhost:8888/gw
 
+### GET gw 2
+GET http://localhost:8888/ga/aaa
+
 ### POST gw
-POST http://localhost:8888/gw/cn.william.wmrpc.demo.api.UserService
+POST http://localhost:8888/ga/cn.william.wmrpc.demo.api.UserService
+Content-Type: application/json
+
+{
+  "service":"cn.william.wmrpc.demo.api.UserService",
+  "methodSign":"findById@1_int",
+  "args":[100]
+}
+
+### POST gw mock
+POST http://localhost:8888/ga/cn.william.wmrpc.demo.api.UserService?mock=true
 Content-Type: application/json
 
 {
