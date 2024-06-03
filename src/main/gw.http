@@ -5,10 +5,30 @@ GET http://localhost:8888/hello
 GET http://localhost:8888/gw
 
 ### GET gw 2
-GET http://localhost:8888/ga/aaa
+GET http://localhost:8888/gw/aaa
 
-### POST gw
-POST http://localhost:8888/ga/cn.william.wmrpc.demo.api.UserService
+### POST ga wmrpc
+POST http://localhost:8888/gw/wmrpc/cn.william.wmrpc.demo.api.UserService
+Content-Type: application/json
+
+{
+  "service":"cn.william.wmrpc.demo.api.UserService",
+  "methodSign":"findById@1_int",
+  "args":[100]
+}
+
+### POST ga direct backend null
+POST http://localhost:8888/gw/direct/cn.william.wmrpc.demo.api.UserService
+Content-Type: application/json
+
+{
+  "service":"cn.william.wmrpc.demo.api.UserService",
+  "methodSign":"findById@1_int",
+  "args":[100]
+}
+
+### POST ga direct backend not null
+POST http://localhost:8888/gw/direct/cn.william.wmrpc.demo.api.UserService?backend=http://127.0.0.1:8081/wmrpc
 Content-Type: application/json
 
 {
