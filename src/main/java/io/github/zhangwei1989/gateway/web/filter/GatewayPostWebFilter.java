@@ -1,4 +1,4 @@
-package io.github.zhangwei1989.gateway;
+package io.github.zhangwei1989.gateway.web.filter;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

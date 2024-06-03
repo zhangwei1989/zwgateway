@@ -1,32 +1,37 @@
-package io.github.zhangwei1989.gateway;
+package io.github.zhangwei1989.gateway.plugin;
 
 import cn.william.wmrpc.core.api.LoadBalancer;
 import cn.william.wmrpc.core.api.RegistryCenter;
 import cn.william.wmrpc.core.cluster.RoundRibbonLoadBalancer;
 import cn.william.wmrpc.core.meta.InstanceMeta;
 import cn.william.wmrpc.core.meta.ServiceMeta;
+import io.github.zhangwei1989.gateway.AbstractGatewayPlugin;
+import io.github.zhangwei1989.gateway.GatewayPluginChain;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.WebHandler;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
 
 /**
- * GatewayWebHandler
+ * WMRpcPlugin
  *
  * @Author : zhangwei(331874675@qq.com)
- * @Create : 2024/6/2
+ * @Create : 2024/6/3
  */
 @Slf4j
-@Component("gatewayWebHandler")
-public class GatewayWebHandler implements WebHandler {
+@Component("wmrpc")
+public class WMRpcPlugin extends AbstractGatewayPlugin {
+
+    public static final String NAME = "wmrpc";
+
+    private String prefix = GATEWAY_PREFIX + "/" + NAME + "/";
 
     @Autowired
     RegistryCenter rc;
@@ -34,9 +39,14 @@ public class GatewayWebHandler implements WebHandler {
     LoadBalancer<InstanceMeta> loadBalancer = new RoundRibbonLoadBalancer();
 
     @Override
-    public Mono<Void> handle(ServerWebExchange exchange) {
-        log.info("======>[ZW Gateway] web handler ......");
-        String service = exchange.getRequest().getPath().value().substring(4);
+    public boolean doSupport(ServerWebExchange exchange) {
+        return exchange.getRequest().getPath().value().startsWith(prefix);
+    }
+
+    @Override
+    public Mono<Void> doHandle(ServerWebExchange exchange, GatewayPluginChain chain) {
+        log.info("======>[ZW Gateway] WMRpcPlugin ......");
+        String service = exchange.getRequest().getPath().value().substring(prefix.length());
         ServiceMeta serviceMeta = ServiceMeta.builder()
                 .name(service)
                 .app("app1")
@@ -60,9 +70,13 @@ public class GatewayWebHandler implements WebHandler {
         exchange.getResponse().getHeaders().add("Content-Type", "application/json");
         exchange.getResponse().getHeaders().add("zw.gw.version", "v1.0.0");
 
-        return body.flatMap(x ->
-                exchange.getResponse()
-                        .writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(x.getBytes()))));
+        return body.flatMap(x -> exchange.getResponse().writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(x.getBytes()))))
+                .then(chain.handle(exchange));
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
     }
 
 }
