@@ -1,6 +1,7 @@
 package io.github.zhangwei1989.gateway.plugin;
 
 import io.github.zhangwei1989.gateway.AbstractGatewayPlugin;
+import io.github.zhangwei1989.gateway.GatewayPluginChain;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +31,7 @@ public class DirectPlugin extends AbstractGatewayPlugin {
     }
 
     @Override
-    public Mono<Void> doHandle(ServerWebExchange exchange) {
+    public Mono<Void> doHandle(ServerWebExchange exchange, GatewayPluginChain chain) {
         log.info("======>[ZW Gateway] DirectPlugin ......");
         String backend = exchange.getRequest().getQueryParams().getFirst("backend");
         Flux<DataBuffer> requestBody = exchange.getRequest().getBody();
@@ -40,7 +41,7 @@ public class DirectPlugin extends AbstractGatewayPlugin {
         exchange.getResponse().getHeaders().add("zw.gw.plugin", getName());
 
         if (backend == null || backend.isEmpty()) {
-            return requestBody.flatMap(x -> exchange.getResponse().writeWith(Mono.just(x))).then();
+            return requestBody.flatMap(x -> exchange.getResponse().writeWith(Mono.just(x))).then(chain.handle(exchange));
         }
 
         WebClient client = WebClient.create(backend);
@@ -49,7 +50,8 @@ public class DirectPlugin extends AbstractGatewayPlugin {
                 .body(requestBody, DataBuffer.class).retrieve().toEntity(String.class);
         Mono<String> body = entity.map(ResponseEntity::getBody);
 
-        return body.flatMap(x -> exchange.getResponse().writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(x.getBytes()))));
+        return body.flatMap(x -> exchange.getResponse().writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(x.getBytes()))))
+                .then(chain.handle(exchange));
     }
 
     @Override

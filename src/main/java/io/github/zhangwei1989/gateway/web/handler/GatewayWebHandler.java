@@ -5,6 +5,7 @@ import cn.william.wmrpc.core.api.RegistryCenter;
 import cn.william.wmrpc.core.cluster.RoundRibbonLoadBalancer;
 import cn.william.wmrpc.core.meta.InstanceMeta;
 import cn.william.wmrpc.core.meta.ServiceMeta;
+import io.github.zhangwei1989.gateway.DefaultGatewayPluginChain;
 import io.github.zhangwei1989.gateway.GatewayPlugin;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,18 +46,7 @@ public class GatewayWebHandler implements WebHandler {
             return exchange.getResponse().writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(mock.getBytes())));
         }
 
-        for (GatewayPlugin plugin : plugins) {
-            if (plugin.support(exchange)) {
-                return plugin.handle(exchange);
-            }
-        }
-
-        String mock = """
-                    {
-                        "result" : "no supported plugin"
-                    }
-                    """;
-        return exchange.getResponse().writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(mock.getBytes())));
+        return new DefaultGatewayPluginChain(plugins).handle(exchange);
     }
 
 }

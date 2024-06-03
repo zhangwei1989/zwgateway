@@ -6,6 +6,7 @@ import cn.william.wmrpc.core.cluster.RoundRibbonLoadBalancer;
 import cn.william.wmrpc.core.meta.InstanceMeta;
 import cn.william.wmrpc.core.meta.ServiceMeta;
 import io.github.zhangwei1989.gateway.AbstractGatewayPlugin;
+import io.github.zhangwei1989.gateway.GatewayPluginChain;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -43,7 +44,7 @@ public class WMRpcPlugin extends AbstractGatewayPlugin {
     }
 
     @Override
-    public Mono<Void> doHandle(ServerWebExchange exchange) {
+    public Mono<Void> doHandle(ServerWebExchange exchange, GatewayPluginChain chain) {
         log.info("======>[ZW Gateway] WMRpcPlugin ......");
         String service = exchange.getRequest().getPath().value().substring(prefix.length());
         ServiceMeta serviceMeta = ServiceMeta.builder()
@@ -69,7 +70,8 @@ public class WMRpcPlugin extends AbstractGatewayPlugin {
         exchange.getResponse().getHeaders().add("Content-Type", "application/json");
         exchange.getResponse().getHeaders().add("zw.gw.version", "v1.0.0");
 
-        return body.flatMap(x -> exchange.getResponse().writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(x.getBytes()))));
+        return body.flatMap(x -> exchange.getResponse().writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(x.getBytes()))))
+                .then(chain.handle(exchange));
     }
 
     @Override
